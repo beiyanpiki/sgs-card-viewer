@@ -22,6 +22,7 @@ Thumbs.db
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 
-# 由 npm run build:data 生成的产物（源数据见 src/lib/data）
-/static/data/
-/static/images/
+# 由 npm run build:data 生成的大体积图片源可按需重新生成；
+# static/data 与 static/images 已入库，保证 CI 构建产物完整可用
+# /static/data/
+# /static/images/
