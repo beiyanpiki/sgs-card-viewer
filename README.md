@@ -59,4 +59,6 @@ npm run build        # 输出到 build/，可直接托管
 
 ## License
 
-仅供学习交流，游戏数据与图片版权归原厂所有。
+本项目基于 [FreeKill](https://github.com/Notify-ctrl/FreeKill) 及其扩展包数据构建，其中使用了 [qsgs-fans/tenyear](https://gitee.com/qsgs-fans/tenyear)（GPL-3.0）等内容，故本项目代码与数据同样以 [GPL-3.0](./LICENSE) 发布。
+
+游戏名称、武将插画等素材版权归原厂所有，仅供学习交流使用。
