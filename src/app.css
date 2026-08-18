@@ -1,0 +1,236 @@
+/* ── 三国杀卡查 · 定制设计系统 ─────────────────────────────
+   基于 Podscan.fm design.md 的结构纪律（单一强调色 / 细边框扁平卡片 /
+   负字距紧排 / pill 徽章），按三国杀主题重铸：
+   宣纸画布 · 松烟墨 · 朱砂印 · 鎏金线 · 宋体标题
+   ─────────────────────────────────────────────────────────── */
+:root {
+	/* 颜色 —— 结构沿袭 design.md 的 token 命名 */
+	--color-emerald-signal: #b42318; /* 朱砂：主行动色（选中/CTA/强调） */
+	--color-cinnabar: #b42318;
+	--color-seal-red: #9a1f16;       /* 印章深朱 */
+	--color-gilded: #a16207;         /* 鎏金：次级强调 / 画师 / 品级 */
+	--color-gold-hairline: #d4af6a;  /* 金色发丝线 */
+	--color-onyx-ink: #211d17;       /* 松烟墨：主文本 */
+	--color-pure-canvas: #f8f5ee;    /* 宣纸画布 */
+	--color-fog: #efe9dc;            /* 淡墨翳：面板/标签底 */
+	--color-slate-whisper: #857c6c;  /* 淡墨：辅助文本 */
+	--color-graphite: #5b5344;       /* 次级正文 */
+	--color-zinc-veil: #a89e8c;      /* 三级文本 */
+	--color-charcoal: #423b30;
+	--color-ash-border: #e0d8c6;     /* 墨色发丝边框 */
+	--color-silver-trace: #cfc5ae;
+	--color-violet-tier: #6d4fa1;    /* 晋/神系紫 */
+	--color-cobalt-signal: #2b6cb0;
+	--color-sprout-wash: #f3e3e0;    /* 朱砂淡翳（选中态底） */
+	--color-crimson-ink: #b42318;
+	--color-rose-blush: #db2777;
+	--color-forest-verdant: #3f7d4e;
+	--color-mint-mist: #f6e7de;      /* 朱砂浅翳（导航选中） */
+	--color-ink-wash: #eae3d4;
+
+	/* 字体 */
+	--font-inter-tight: 'Noto Serif SC', 'Songti SC', 'STSong', 'SimSun', serif; /* 标题：宋体积墨 */
+	--font-ui: 'Noto Sans SC', -apple-system, 'Segoe UI', Roboto, 'PingFang SC',
+		'Microsoft YaHei', sans-serif;
+
+	/* 阴影 —— 墨晕而非投影 */
+	--shadow-subtle: 0 1px 2px 0 rgba(33, 29, 23, 0.05);
+	--shadow-subtle-2: 0 1px 3px 0 rgba(33, 29, 23, 0.1), 0 1px 2px -1px rgba(33, 29, 23, 0.1);
+	--shadow-md-cinnabar: 0 10px 15px -3px rgba(180, 35, 24, 0.18), 0 4px 6px -4px rgba(180, 35, 24, 0.18);
+	--shadow-card-lift: 0 6px 16px -6px rgba(33, 29, 23, 0.18);
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html, body {
+	height: 100%;
+}
+
+body {
+	margin: 0;
+	background: var(--color-pure-canvas);
+	color: var(--color-onyx-ink);
+	font-family: var(--font-ui);
+	font-size: 16px;
+	line-height: 1.5;
+	letter-spacing: -0.2px;
+	-webkit-font-smoothing: antialiased;
+}
+
+/* 宣纸质感：极淡的纤维噪点 */
+body::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	z-index: 0;
+	background-image: radial-gradient(rgba(33, 29, 23, 0.018) 1px, transparent 1px);
+	background-size: 5px 5px;
+}
+
+a {
+	color: inherit;
+	text-decoration: none;
+}
+
+h1, h2, h3 {
+	font-family: var(--font-inter-tight);
+	letter-spacing: 0.02em;
+	margin: 0;
+	font-weight: 700;
+}
+
+.container {
+	max-width: 1200px;
+	margin: 0 auto;
+	padding: 0 32px;
+}
+
+/* ── 导航：墨栏 + 朱砂印章 logo ── */
+header.site {
+	background: var(--color-pure-canvas);
+	border-bottom: 1px solid var(--color-ash-border);
+	height: 64px;
+	position: sticky;
+	top: 0;
+	z-index: 20;
+	box-shadow: var(--shadow-subtle-2);
+}
+header.site .container {
+	height: 100%;
+	display: flex;
+	align-items: center;
+	gap: 32px;
+}
+.brand-seal {
+	background: var(--color-seal-red);
+	color: #f8f5ee;
+	border-radius: 6px;
+	padding: 6px 12px;
+	font-family: var(--font-inter-tight);
+	font-size: 15px;
+	font-weight: 700;
+	letter-spacing: 0.24em;
+	text-indent: 0.24em;
+	box-shadow: inset 0 0 0 1.5px rgba(248, 245, 238, 0.35);
+}
+header.site nav {
+	display: flex;
+	gap: 28px;
+	height: 100%;
+}
+header.site nav a {
+	display: flex;
+	align-items: center;
+	font-size: 14px;
+	font-weight: 500;
+	color: var(--color-graphite);
+	border-bottom: 2px solid transparent;
+	letter-spacing: 0.08em;
+}
+header.site nav a:hover,
+header.site nav a.active {
+	color: var(--color-onyx-ink);
+	border-bottom-color: var(--color-gold-hairline);
+}
+
+/* ── 按钮 ── */
+.btn {
+	background: var(--color-pure-canvas);
+	border: 1px solid var(--color-ash-border);
+	color: var(--color-onyx-ink);
+	padding: 8px 16px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 600;
+	font-family: var(--font-ui);
+	letter-spacing: 0.02em;
+}
+.btn:hover {
+	box-shadow: var(--shadow-subtle-2);
+	border-color: var(--color-gold-hairline);
+}
+.btn-primary {
+	background: var(--color-cinnabar);
+	border: none;
+	color: #f8f5ee;
+	padding: 10px 20px;
+	border-radius: 6px;
+	cursor: pointer;
+	font-size: 14px;
+	font-weight: 600;
+	font-family: var(--font-ui);
+	letter-spacing: 0.04em;
+}
+.btn-primary:hover {
+	box-shadow: var(--shadow-md-cinnabar);
+}
+
+/* ── 输入 ── */
+input.search {
+	background: var(--color-pure-canvas);
+	border: 1px solid var(--color-ash-border);
+	border-radius: 8px;
+	color: var(--color-onyx-ink);
+	padding: 11px 14px;
+	font-size: 15px;
+	font-family: var(--font-ui);
+	width: 100%;
+}
+input.search::placeholder {
+	color: var(--color-zinc-veil);
+}
+input.search:focus {
+	outline: none;
+	border-color: var(--color-cinnabar);
+	box-shadow: 0 0 0 3px rgba(180, 35, 24, 0.1);
+}
+
+/* ── 徽章 / 印线卡 ── */
+.pill {
+	border-radius: 9999px;
+	padding: 2px 10px;
+	font-size: 12px;
+	font-weight: 500;
+	background: var(--color-fog);
+	color: var(--color-graphite);
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.card {
+	background: var(--color-pure-canvas);
+	border: 1px solid var(--color-ash-border);
+	border-radius: 10px;
+}
+
+.muted {
+	color: var(--color-slate-whisper);
+}
+
+/* ── Dashboard 外壳（仅桌面端锁滚动，移动端正常流式滚动）── */
+@media (min-width: 901px) {
+	body.dashboard {
+		overflow: hidden;
+	}
+	body.dashboard main {
+		height: calc(100vh - 64px);
+		overflow: hidden;
+	}
+}
+
+@media (max-width: 900px) {
+	.container {
+		padding: 0 16px;
+	}
+	header.site .container {
+		gap: 16px;
+	}
+	header.site nav {
+		gap: 16px;
+	}
+}
