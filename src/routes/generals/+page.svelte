@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { kingdomLabel, kingdomStyle, KINGDOMS } from '$lib/kingdoms';
+	import { isMobileLayout, loadListState, saveListState, syncFiltersToUrl } from '$lib/restore';
 	import type { General, GamePackage } from '$lib/types';
 
 	let generals: General[] = $state([]);
@@ -15,6 +16,10 @@
 	// 移动端多级抽屉
 	let drawer = $state(false);
 	let drawerMain = $state(''); // '' = 第一级（扩展系列），否则为第二级的扩展 key
+
+	// 返回时恢复：记录滚动位置（桌面端为 .scroll 容器，移动端为 window）
+	let scrollEl: HTMLElement | undefined = $state();
+	let scrollPos = 0;
 
 	interface MainPack {
 		key: string;
@@ -90,11 +95,19 @@
 		document.body.style.overflow = drawer ? 'hidden' : '';
 	});
 
+	// 筛选条件写入 URL，返回时由 onMount 重新读取
+	$effect(() => {
+		syncFiltersToUrl({ q, main, sub, kingdom });
+	});
+
 	onMount(async () => {
 		const params = new URLSearchParams(location.search);
 		q = params.get('q') ?? '';
 		main = params.get('main') ?? '';
 		sub = params.get('sub') ?? '';
+		kingdom = params.get('kingdom') ?? '';
+		const saved = loadListState('generals');
+		if (saved) limit = Math.max(60, Number(saved.limit) || 60); // 恢复“加载更多”的条数，否则滚动位置无处可去
 		const [g, p] = await Promise.all([
 			fetch('/data/generals.json').then((r) => r.json()),
 			fetch('/data/packages.json').then((r) => r.json()),
@@ -102,12 +115,23 @@
 		generals = g;
 		packages = p;
 		loaded = true;
+		if (saved) {
+			const pos = Number(saved.pos) || 0;
+			await tick();
+			if (isMobileLayout()) window.scrollTo(0, pos);
+			else if (scrollEl) scrollEl.scrollTop = pos;
+		}
 	});
+
+	// 离开页面（进入武将详情等）时保存滚动位置与已加载条数
+	onMount(() => () => saveListState('generals', { pos: scrollPos, limit }));
 </script>
 
 <svelte:head>
 	<title>武将 · 三国杀卡查</title>
 </svelte:head>
+
+<svelte:window onscroll={() => { if (isMobileLayout()) scrollPos = window.scrollY; }} />
 
 <div class="page">
 	<aside class="pane mains">
@@ -182,7 +206,7 @@
 			<span class="muted count-label">{loaded ? `${filtered.length} 名武将` : '加载中…'}</span>
 		</div>
 
-		<div class="scroll">
+		<div class="scroll" bind:this={scrollEl} onscroll={() => { if (!isMobileLayout()) scrollPos = scrollEl?.scrollTop ?? 0; }}>
 			{#if loaded && filtered.length === 0}
 				<div class="empty">没有匹配的武将</div>
 			{:else if loaded}
