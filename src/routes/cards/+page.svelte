@@ -1,6 +1,7 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { SUIT_SYMBOL, suitRed, typeLabel, CARD_TYPE_LABEL } from '$lib/kingdoms';
+	import { isMobileLayout, loadListState, saveListState, syncFiltersToUrl } from '$lib/restore';
 	import type { Card, GamePackage } from '$lib/types';
 
 	let cards: Card[] = $state([]);
@@ -12,6 +13,10 @@
 	let cat = $state(''); // 分组级筛选：身份局 / 国战
 	// 移动端筛选抽屉
 	let drawer = $state(false);
+
+	// 返回时恢复：记录滚动位置（桌面端为 .scroll 容器，移动端为 window）
+	let scrollEl: HTMLElement | undefined = $state();
+	let scrollPos = 0;
 
 	const pkgLabel = (name: string) => packages.find((p) => p.name === name)?.label ?? name;
 	const numberCN = (n: number | null) => (n === null ? '' : n <= 10 ? String(n) : ['J', 'Q', 'K'][n - 11] ?? String(n));
@@ -89,7 +94,18 @@
 		document.body.style.overflow = drawer ? 'hidden' : '';
 	});
 
+	// 筛选条件写入 URL，返回时由 onMount 重新读取
+	$effect(() => {
+		syncFiltersToUrl({ q, type, pkg, cat });
+	});
+
 	onMount(async () => {
+		const params = new URLSearchParams(location.search);
+		q = params.get('q') ?? '';
+		type = params.get('type') ?? '';
+		pkg = params.get('pkg') ?? '';
+		cat = params.get('cat') ?? '';
+		const saved = loadListState('cards');
 		const [c, p] = await Promise.all([
 			fetch('/data/cards.json').then((r) => r.json()),
 			fetch('/data/packages.json').then((r) => r.json()),
@@ -97,12 +113,23 @@
 		cards = c;
 		packages = p;
 		loaded = true;
+		if (saved) {
+			const pos = Number(saved.pos) || 0;
+			await tick();
+			if (isMobileLayout()) window.scrollTo(0, pos);
+			else if (scrollEl) scrollEl.scrollTop = pos;
+		}
 	});
+
+	// 离开页面（进入卡牌详情等）时保存滚动位置
+	onMount(() => () => saveListState('cards', { pos: scrollPos }));
 </script>
 
 <svelte:head>
 	<title>卡牌 · 三国杀卡查</title>
 </svelte:head>
+
+<svelte:window onscroll={() => { if (isMobileLayout()) scrollPos = window.scrollY; }} />
 
 <div class="page">
 	<aside class="pane">
@@ -148,7 +175,7 @@
 				</button>
 			{/each}
 		</div>
-		<div class="scroll">
+		<div class="scroll" bind:this={scrollEl} onscroll={() => { if (!isMobileLayout()) scrollPos = scrollEl?.scrollTop ?? 0; }}>
 			{#if loaded && filtered.length === 0}
 				<div class="empty">没有匹配的卡牌</div>
 			{:else if loaded}
